@@ -1,17 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Lib where
 
+import           Control.Lens
 import           Data.Aeson                   (toJSON)
 import qualified Data.ByteString.Char8        as C8
-import qualified Github
 import           Language.Haskell.Exts.SrcLoc (srcFilename, srcLine)
 import           Language.Haskell.HLint
 import           Network.Wreq
-
 import           System.Environment           (getEnv)
 
--- Operators such as (&) and (.~).
-import           Control.Lens
+import           Annotation                   (Annotation (..))
+import qualified Annotation
+import qualified Github
 
 
 
@@ -28,14 +28,14 @@ optsWith token = defaults
 
 url = "https://api.github.com/repos/anviking/check-runs/check-runs"
 
-toAnnotation :: Suggestion -> Github.Annotation
+toAnnotation :: Suggestion -> Annotation
 toAnnotation s =
-  Github.Annotation
-    { Github.path = srcFilename loc
-    , Github.startLine = srcLine loc
-    , Github.endLine = srcLine loc
-    , Github.annotationLevel = Github.Warning
-    , Github.message = show s
+  Annotation
+    { path = srcFilename loc
+    , startLine = srcLine loc
+    , endLine = srcLine loc
+    , annotationLevel = Annotation.Warning
+    , message = show s
     }
   where
     loc = suggestionLocation s
@@ -53,6 +53,6 @@ checkHlint sha = do
   hints <- hlint ["src"]
   let ann = map toAnnotation hints
   let output = Github.Output "Title" "Summmary" ann
-
-  create $ Github.Check "HLint" sha (Just output)
+  let conclusion = Github.Success
+  create $ Github.Check "HLint" sha (Just output) conclusion
 
