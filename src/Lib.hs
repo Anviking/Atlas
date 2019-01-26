@@ -3,8 +3,8 @@ module Lib where
 
 import           Data.Aeson                   (toJSON)
 import qualified Data.ByteString.Char8        as C8
-import           Github
-import           Language.Haskell.Exts.SrcLoc
+import qualified Github
+import           Language.Haskell.Exts.SrcLoc (srcFilename, srcLine)
 import           Language.Haskell.HLint
 import           Network.Wreq
 
@@ -28,24 +28,31 @@ optsWith token = defaults
 
 url = "https://api.github.com/repos/anviking/check-runs/check-runs"
 
-toAnnotation :: Suggestion -> Annotation
+toAnnotation :: Suggestion -> Github.Annotation
 toAnnotation s =
-  Annotation
-    { path = srcFilename loc
-    , start_line = srcLine loc
-    , end_line = srcLine loc
-    , annotation_level = "warning"
-    , message = show s
+  Github.Annotation
+    { Github.path = srcFilename loc
+    , Github.startLine = srcLine loc
+    , Github.endLine = srcLine loc
+    , Github.annotationLevel = Github.Warning
+    , Github.message = show s
     }
   where
     loc = suggestionLocation s
 
-create :: Check -> IO CheckResponse
+create :: Github.Check -> IO Github.CheckResponse
 create c = do
   opts <- optsWith <$> getEnv "token"
-  hints <- hlint ["src"]
-
-  let a = map toAnnotation hints
 
   r <- asJSON =<< postWith opts url (toJSON c)
   return $ r ^. responseBody
+
+
+checkHlint :: String -> IO Github.CheckResponse
+checkHlint sha = do
+  hints <- hlint ["src"]
+  let ann = map toAnnotation hints
+  let output = Github.Output "Title" "Summmary" ann
+
+  create $ Github.Check "HLint" sha (Just output)
+

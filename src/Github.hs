@@ -13,12 +13,10 @@ data Check = Check
   } deriving stock (Show, Eq, Generic)
     deriving (ToJSON)
 
-
-
 data Output = Output
   { title       :: String
   , summary     :: String
-  , annotations :: Maybe [Annotation]
+  , annotations :: [Annotation]
   } deriving stock (Show, Eq, Generic)
     deriving (ToJSON)
 
@@ -28,10 +26,26 @@ data CheckResponse = CheckResponse
     deriving (ToJSON, FromJSON)
 
 data Annotation = Annotation
-  { path             :: String
-  , start_line       :: Int
-  , end_line         :: Int
-  , message          :: String
-  , annotation_level :: String
+  { path            :: String
+  , startLine       :: Int
+  , endLine         :: Int
+  , message         :: String
+  , annotationLevel :: Level
   } deriving stock (Show, Eq, Generic)
-    deriving (ToJSON)
+
+data Level
+  = Notice
+  | Warning
+  | Failure
+  deriving stock (Show, Eq, Generic)
+
+jsonOptions = defaultOptions
+  { constructorTagModifier = camelTo2 '_'
+  , fieldLabelModifier = camelTo2 '_'
+  }
+
+instance ToJSON   Level      where toJSON    = genericToJSON jsonOptions
+instance FromJSON Level      where parseJSON = genericParseJSON jsonOptions
+
+instance ToJSON   Annotation where toJSON    = genericToJSON jsonOptions
+instance FromJSON Annotation where parseJSON = genericParseJSON jsonOptions
