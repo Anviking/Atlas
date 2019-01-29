@@ -4,10 +4,12 @@ module Lib where
 import           Control.Lens
 import           Data.Aeson                   (toJSON)
 import qualified Data.ByteString.Char8        as C8
+import           Data.Time
 import           Language.Haskell.Exts.SrcLoc (srcFilename, srcLine)
 import           Language.Haskell.HLint
 import           Network.Wreq
 import           System.Environment           (getEnv)
+import           System.Process
 
 import           Annotation                   (Annotation (..))
 import qualified Annotation
@@ -48,11 +50,18 @@ create c = do
   return $ r ^. responseBody
 
 
-checkHlint :: String -> IO Github.CheckResponse
-checkHlint sha = do
+checkHlint :: IO Github.CheckResponse
+checkHlint = do
   hints <- hlint ["src"]
+  sha <- readProcess  "git" ["rev-parse", "HEAD"] []
+  print sha
   let ann = map toAnnotation hints
   let output = Github.Output "Title" "Summmary" ann
   let conclusion = Github.Success
-  create $ Github.Check "HLint" sha (Just output) conclusion
+  time <- getCurrentTime
+  create $ Github.Check "HLint" sha (Just output) conclusion (Just time)
+
+-- checkBuild :: IO Github.CheckResponse
+-- checkBuild = do
+--   output <- readProcess "stack" ["build"] []
 

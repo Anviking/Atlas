@@ -4,6 +4,7 @@
 module Github where
 
 import           Data.Aeson
+import           Data.Time
 import           GHC.Generics
 
 import           Annotation   (Annotation (..))
@@ -11,10 +12,11 @@ import qualified Annotation
 import           Util
 
 data Check = Check
-  { name       :: String
-  , head_sha   :: String
-  , output     :: Maybe Output
-  , conclusion :: Conclusion
+  { name        :: String
+  , head_sha    :: String
+  , output      :: Maybe Output
+  , conclusion  :: Conclusion
+  , completedAt :: Maybe UTCTime
   } deriving stock (Show, Eq, Generic)
 
 data Conclusion

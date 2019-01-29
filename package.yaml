@@ -27,6 +27,8 @@ dependencies:
 - bytestring
 - lens
 - haskell-src-exts
+- time
+- process
 
 library:
   source-dirs: src
