@@ -1,0 +1,18 @@
+check-runs-0.1.0.0: unregistering (local file changes: src/Lib.hs test/Spec.hs)
+check-runs-0.1.0.0: configure (lib + exe)
+Configuring check-runs-0.1.0.0...
+clang: warning: argument unused during compilation: '-nopie' [-Wunused-command-line-argument]
+check-runs-0.1.0.0: build (lib + exe)
+Preprocessing library for check-runs-0.1.0.0..
+Building library for check-runs-0.1.0.0..
+[5 of 5] Compiling Lib              ( src/Lib.hs, .stack-work/dist/x86_64-osx/Cabal-2.2.0.1/build/Lib.o )
+
+/Users/Johannes/IOHK/check-runs/src/Lib.hs:62:14: error: Empty 'do' block
+   |
+62 | checkBuild = do
+   |              ^^
+
+
+--  While building custom Setup.hs for package check-runs-0.1.0.0 using:
+      /Users/Johannes/.stack/setup-exe-cache/x86_64-osx/Cabal-simple_mPHDZzAJ_2.2.0.1_ghc-8.4.4 --builddir=.stack-work/dist/x86_64-osx/Cabal-2.2.0.1 build lib:check-runs exe:check-runs-exe --ghc-options " -ddump-hi -ddump-to-file -fdiagnostics-color=always"
+    Process exited with code: ExitFailure 1
