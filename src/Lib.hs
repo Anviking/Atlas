@@ -58,7 +58,11 @@ checkHlint = do
   time <- getCurrentTime
   create $ Github.Check "HLint" sha (Just output) conclusion (Just time)
 
--- checkBuild :: IO Github.CheckResponse
--- checkBuild = do
---   output <- readProcess "stack" ["build"] []
+--checkBuild :: IO Github.Check
+--checkBuild = do
+--  output <- readProcess "stack" ["build"] []
+--
+
+--parseStack :: String -> [Annotation]
+--parseStack =
 
