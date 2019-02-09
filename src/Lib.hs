@@ -20,9 +20,6 @@ import qualified Github
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
-sha = "c76d10de5ba75e7acf836c27becc50f6bc2f32be"
-
-
 optsWith token = defaults
   & auth ?~ oauth2Bearer (C8.pack token)
   & header "Accept" .~ ["application/vnd.github.antiope-preview+json"]
@@ -53,7 +50,7 @@ create c = do
 checkHlint :: IO Github.CheckResponse
 checkHlint = do
   hints <- hlint ["src"]
-  sha <- readProcess  "git" ["rev-parse", "HEAD"] []
+  sha <- init <$> readProcess  "git" ["rev-parse", "HEAD"] []
   print sha
   let ann = map toAnnotation hints
   let output = Github.Output "Title" "Summmary" ann
