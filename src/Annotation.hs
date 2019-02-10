@@ -24,9 +24,10 @@ data Level
   | Failure
   deriving stock (Show, Eq, Generic)
 
+omitJsonOptions = jsonOptions { omitNothingFields = True }
 
-instance ToJSON   Level      where toJSON    = genericToJSON jsonOptions
-instance FromJSON Level      where parseJSON = genericParseJSON jsonOptions
+instance ToJSON   Level      where toJSON    = genericToJSON omitJsonOptions
+instance FromJSON Level      where parseJSON = genericParseJSON omitJsonOptions
 
-instance ToJSON   Annotation where toJSON    = genericToJSON jsonOptions
-instance FromJSON Annotation where parseJSON = genericParseJSON jsonOptions
+instance ToJSON   Annotation where toJSON    = genericToJSON omitJsonOptions
+instance FromJSON Annotation where parseJSON = genericParseJSON omitJsonOptions
