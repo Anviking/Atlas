@@ -70,9 +70,9 @@ getPwd = init <$> readProcess  "pwd" [] []
 checkStack :: String -> IO Github.CheckResponse
 checkStack prefix = do
   sha <- init <$> readProcess  "git" ["rev-parse", "HEAD"] []
-  print sha
-  f <- readFile "test/fixtures/stack-build.txt"
-  ann <- case catMaybes <$> parseOnly (Stack.output prefix) (C8.pack f) of
+  log <- init <$> readProcess  "stack" ["build"] []
+  print log
+  ann <- case catMaybes <$> parseOnly (Stack.output prefix) (C8.pack log) of
     Right a -> return a
     Left  e -> print e >> return []
   let output = Github.Output "Title" "Summmary" ann
