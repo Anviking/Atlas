@@ -2,18 +2,21 @@
 module Lib where
 
 import           Control.Lens
-import           Data.Aeson                   (toJSON)
-import qualified Data.ByteString.Char8        as C8
+import           Data.Aeson                       (toJSON)
+import           Data.Attoparsec.ByteString.Char8
+import qualified Data.ByteString.Char8            as C8
+import           Data.Maybe                       (catMaybes)
 import           Data.Time
-import           Language.Haskell.Exts.SrcLoc (srcFilename, srcLine)
+import           Language.Haskell.Exts.SrcLoc     (srcFilename, srcLine)
 import           Language.Haskell.HLint
 import           Network.Wreq
-import           System.Environment           (getEnv)
+import           System.Environment               (getEnv)
 import           System.Process
 
-import           Annotation                   (Annotation (..))
+import           Annotation                       (Annotation (..))
 import qualified Annotation
 import qualified Github
+import qualified Stack
 
 
 
@@ -59,6 +62,24 @@ checkHlint = do
   let conclusion = Github.Success
   time <- getCurrentTime
   create $ Github.Check "HLint" sha (Just output) conclusion (Just time)
+
+
+getPwd = init <$> readProcess  "pwd" [] []
+
+
+checkStack :: String -> IO Github.CheckResponse
+checkStack prefix = do
+  sha <- init <$> readProcess  "git" ["rev-parse", "HEAD"] []
+  print sha
+  f <- readFile "test/fixtures/stack-build.txt"
+  ann <- case catMaybes <$> parseOnly (Stack.output prefix) (C8.pack f) of
+    Right a -> return a
+    Left  e -> print e >> return []
+  let output = Github.Output "Title" "Summmary" ann
+  let conclusion = Github.Success
+  time <- getCurrentTime
+  create $ Github.Check "stack build" sha (Just output) conclusion (Just time)
+
 
 --checkBuild :: IO Github.Check
 --checkBuild = do
