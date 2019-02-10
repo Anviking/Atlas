@@ -1,10 +1,10 @@
-name:                check-runs
+name:                atlas
 version:             0.1.0.0
-github:              "githubuser/check-runs"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2019 Author name here"
+github:              "Anviking/Atlas"
+license:             MIT
+author:              "Johannes Lund"
+maintainer:          "anviking@me.com"
+copyright:           "2019 Johannes Lund"
 
 extra-source-files:
 - README.md
@@ -17,7 +17,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/check-runs#readme>
+description:         Please see the README on GitHub at <https://github.com/Anviking/Atlas#readme>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -35,7 +35,7 @@ library:
   source-dirs: src
 
 executables:
-  check-runs-exe:
+  atlas-check:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -43,10 +43,10 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - check-runs
+    - atlas
 
 tests:
-  check-runs-test:
+  atlas-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -54,5 +54,5 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - check-runs
+    - atlas
     - hspec
