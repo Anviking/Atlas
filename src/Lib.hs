@@ -33,6 +33,8 @@ toAnnotation s =
     { path = srcFilename loc
     , startLine = srcLine loc
     , endLine = srcLine loc
+    , startColumn = Nothing
+    , endColumn = Nothing
     , annotationLevel = Annotation.Warning
     , message = show s
     }

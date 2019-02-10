@@ -12,6 +12,8 @@ data Annotation = Annotation
   { path            :: String
   , startLine       :: Int
   , endLine         :: Int
+  , startColumn     :: Maybe Int
+  , endColumn       :: Maybe Int
   , message         :: String
   , annotationLevel :: Level
   } deriving stock (Show, Eq, Generic)
