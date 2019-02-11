@@ -7,6 +7,7 @@ import           Data.Attoparsec.ByteString.Char8
 import qualified Data.Attoparsec.ByteString.Char8 as P
 import           Data.Attoparsec.Combinator
 import qualified Data.ByteString.Char8            as C8
+import           Data.List                        (stripPrefix)
 import           Data.Maybe                       (catMaybes)
 import           Text.Read                        (readMaybe)
 
@@ -15,8 +16,8 @@ stringToColon = P.takeWhile (\x -> x /= ':' && x /= '\n')
 restOfLine = P.takeWhile (/= '\n')
 
 -- "foo/bar.hs:12:2: "
-status :: Parser Annotation
-status = do
+status :: String -> Parser Annotation
+status rootPath = do
   file <- stringToColon
   _ <- ":"
   line <- decimal
@@ -24,17 +25,16 @@ status = do
   column <- decimal
   _ <- ": "
   _ <- "error:"
-  message <- restOfLine
+  message <- manyTill anyChar (char '|')
   (a, b) <- m line
 
-  return (C8.unpack file, line, column, C8.unpack message)
   return $ Annotation
-    { path = C8.unpack file
+    { path = maybe "?" id $ stripPrefix rootPath (C8.unpack file)
     , startLine = line
     , endLine = line
     , startColumn = Just a
     , endColumn = Just b
-    , message = C8.unpack message
+    , message = message
     , annotationLevel = Failure
     }
 
@@ -68,13 +68,12 @@ m line = do
         _ <- restOfLine
         return Nothing
 
-output = do
-  let a = string "ch"
-  ((choice [Just <$> status, restOfLine >> return Nothing]) `sepBy` (char '\n'))
+output prefix = do
+  ((choice [Just <$> status prefix, restOfLine >> return Nothing]) `sepBy` (char '\n'))
 
 test = do
   f <- readFile "test/fixtures/stack-build.txt"
-  case catMaybes <$> parseOnly Stack.output (C8.pack f) of
+  case catMaybes <$> parseOnly (Stack.output "") (C8.pack f) of
     Right a -> forM_ a print
     Left  e -> print e
 
