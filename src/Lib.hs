@@ -98,7 +98,7 @@ checkStack prefix = do
   (_, _, log) <- readProcessWithExitCode "stack" ["build"] []
   print log
   ann <- case catMaybes <$> parseOnly (Stack.output prefix) (C8.pack log) of
-    Right a -> return a
+    Right a -> a
     Left  e -> print e >> return []
   let output = Github.Output "Title" "Summmary" ann
   let conclusion = defaultConclusion ann
