@@ -25,17 +25,16 @@ status rootPath = do
   column <- decimal
   _ <- ": "
   _ <- "error:"
-  message <- restOfLine
+  message <- manyTill anyChar (char '|')
   (a, b) <- m line
 
-  return (C8.unpack file, line, column, C8.unpack message)
   return $ Annotation
     { path = maybe "?" id $ stripPrefix rootPath (C8.unpack file)
     , startLine = line
     , endLine = line
     , startColumn = Just a
     , endColumn = Just b
-    , message = C8.unpack message
+    , message = message
     , annotationLevel = Failure
     }
 

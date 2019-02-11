@@ -2,7 +2,7 @@
 module Lib where
 
 import           Control.Lens
-import           Data.Aeson                       (toJSON)
+import           Data.Aeson                       (encode, toJSON)
 import           Data.Attoparsec.ByteString.Char8
 import qualified Data.ByteString.Char8            as C8
 import           Data.Maybe                       (catMaybes)
@@ -47,7 +47,7 @@ toAnnotation s =
 create :: Github.Check -> IO Github.CheckResponse
 create c = do
   opts <- optsWith <$> getEnv "token"
-
+  print (encode c)
   r <- asJSON =<< postWith opts url (toJSON c)
   return $ r ^. responseBody
 
@@ -70,10 +70,10 @@ getPwd = init <$> readProcess  "pwd" [] []
 checkStack :: String -> IO Github.CheckResponse
 checkStack prefix = do
   sha <- init <$> readProcess  "git" ["rev-parse", "HEAD"] []
-  log <- init <$> readProcess  "stack" ["build"] []
+  (_, _, log) <- readProcessWithExitCode "stack" ["build"] []
   print log
   ann <- case catMaybes <$> parseOnly (Stack.output prefix) (C8.pack log) of
-    Right a -> a
+    Right a -> return a
     Left  e -> print e >> return []
   let output = Github.Output "Title" "Summmary" ann
   let conclusion = Github.Success
