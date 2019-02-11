@@ -8,13 +8,16 @@ import qualified Data.ByteString.Char8            as C8
 import           Data.Maybe                       (catMaybes)
 import           Data.Time
 import           Language.Haskell.Exts.SrcLoc     (srcFilename, srcLine)
-import           Language.Haskell.HLint
+import           Language.Haskell.HLint           (Suggestion, hlint,
+                                                   suggestionLocation)
 import           Network.Wreq
 import           System.Environment               (getEnv)
 import           System.Process
 
 import           Annotation                       (Annotation (..))
+import qualified Annotation                       as A
 import qualified Annotation
+import           Github                           (Conclusion (..))
 import qualified Github
 import qualified Stack
 
@@ -28,7 +31,7 @@ optsWith token = defaults
   & header "Accept" .~ ["application/vnd.github.antiope-preview+json"]
 
 
-url = "https://api.github.com/repos/anviking/check-runs/check-runs"
+url = "https://api.github.com/repos/anviking/Atlas/check-runs"
 
 toAnnotation :: Suggestion -> Annotation
 toAnnotation s =
@@ -54,15 +57,37 @@ create c = do
 
 checkHlint :: IO Github.CheckResponse
 checkHlint = do
-  hints <- hlint ["src"]
   sha <- init <$> readProcess  "git" ["rev-parse", "HEAD"] []
-  print sha
-  let ann = map toAnnotation hints
-  let output = Github.Output "Title" "Summmary" ann
-  let conclusion = Github.Success
+  output <- hlintOutput
+  let conclusion = defaultConclusion (Github.annotations output)
   time <- getCurrentTime
   create $ Github.Check "HLint" sha (Just output) conclusion (Just time)
 
+
+defaultSummary :: [Annotation] -> String
+defaultSummary _ = ""
+
+defaultConclusion :: [Annotation] -> Github.Conclusion
+defaultConclusion a = convert $ foldl reevaluate A.Notice (map A.annotationLevel a)
+  where
+    -- Todo: must be a better way with Ord or something
+    reevaluate :: Annotation.Level -> Annotation.Level -> Annotation.Level
+    reevaluate A.Notice a          = a
+    reevaluate A.Warning A.Notice  = A.Warning
+    reevaluate A.Warning A.Failure = A.Failure
+    reevaluate A.Warning A.Warning = A.Failure
+    reevaluate A.Failure _         = A.Failure
+
+    convert :: Annotation.Level -> Conclusion
+    convert A.Notice  = Neutral
+    convert A.Warning = Failure
+    convert A.Failure = Failure
+
+hlintOutput :: IO Github.Output
+hlintOutput = do
+  hints <- hlint ["src"]
+  let ann = map toAnnotation hints
+  return $ Github.Output "Hlint" (defaultSummary ann) ann
 
 getPwd = init <$> readProcess  "pwd" [] []
 
@@ -76,7 +101,7 @@ checkStack prefix = do
     Right a -> return a
     Left  e -> print e >> return []
   let output = Github.Output "Title" "Summmary" ann
-  let conclusion = Github.Success
+  let conclusion = defaultConclusion ann
   time <- getCurrentTime
   create $ Github.Check "stack build" sha (Just output) conclusion (Just time)
 
