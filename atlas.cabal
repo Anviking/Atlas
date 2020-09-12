@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 37ff204823e1715aad60c3b9168e8c08e01b346954f6d2910dbb87416d016656
+-- hash: 1ffbe3df31e6b5d1829e4425f57767e0ec8cd5fe9fb14987f8d7def485a376f6
 
 name:           atlas
 version:        0.1.0.0
@@ -15,10 +17,9 @@ copyright:      2019 Johannes Lund
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
-cabal-version:  >= 1.10
 extra-source-files:
-    ChangeLog.md
     README.md
+    ChangeLog.md
 
 source-repository head
   type: git
